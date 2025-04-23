@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
-import { ResendModule } from './integrations/resend/resend/resend.module';
-import { PrismaModule } from './integrations/prisma/prisma/prisma.module';
+import { BetterAuthModule } from './integrations/better-auth/better-auth.module';
+import { PrismaModule } from './integrations/prisma/prisma.module';
+import { ResendModule } from './integrations/resend/resend.module';
 
 @Module({
   imports: [
@@ -12,8 +13,10 @@ import { PrismaModule } from './integrations/prisma/prisma/prisma.module';
     }),
     ResendModule,
     PrismaModule,
+    BetterAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [BetterAuthModule],
 })
 export class AppModule {}
