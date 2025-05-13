@@ -1,98 +1,136 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Better Auth Integration Boilerplate
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Welcome to **Better Auth Integration Boilerplate**, a starter template designed to help you quickly set up secure and modern authentication for your applications. This project is built primarily with **TypeScript** and **JavaScript**, making it easy to extend and adapt for your specific needs.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+- [About](#about)
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Integrations](#integrations)
+- [Contributing](#contributing)
+- [License](#license)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## About
 
-```bash
-$ yarn install
+This boilerplate serves as a quick-start template for integrating authentication into your applications. It provides a well-structured codebase with best practices for authentication, email handling, and database management, making it easier to focus on building your core application features.
+
+## Features
+
+- **Pre-configured Authentication**: Includes basic user authentication, API key authentication, magic link authentication, and an admin addon for managing permissions and bans.
+- **Email Sending**: Integrated with the Resend SDK for handling email communication (e.g., email verification and magic links).
+- **Database ORM**: Uses Prisma for database operations with a ready-to-use schema for users, sessions, accounts, and API keys.
+- **TypeScript-first**: Ensures type safety and better developer experience.
+- **Customizable**: Easily extend and modify the boilerplate to suit your needs.
+- **Secure**: Implements best practices for secure authentication.
+
+## Getting Started
+
+Follow the steps below to get started with this boilerplate.
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v16 or higher)
+- **npm** or **yarn**
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/withviktor/better-auth-integration.git
+   cd better-auth-integration
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+## Configuration
+
+This boilerplate includes configuration options to suit various use cases. Update the following files to set up your authentication, email, and database:
+
+- **Authentication**: Modify `src/utils/auth.ts` to configure BetterAuth (e.g., enable plugins like API keys, magic links, and OpenAPI).
+- **Email Sending**: Update `src/utils/resend.ts` with your Resend API key.
+- **Database**: Check `prisma/schema.prisma` to configure your database schema and connection.
+
+## Usage
+
+After configuring the boilerplate, you can start building your application.
+
+### Example
+
+Here’s how to use the boilerplate to set up authentication:
+
+```typescript
+import { auth } from './utils/auth';
+
+// Use the `auth` object in your application
+app.use(auth.middleware);
 ```
 
-## Compile and run the project
+## Integrations
 
-```bash
-# development
-$ yarn run start
+This boilerplate includes the following key integrations:
 
-# watch mode
-$ yarn run start:dev
+### Authentication with BetterAuth
 
-# production mode
-$ yarn run start:prod
-```
+The `auth.ts` file pre-configures **BetterAuth** with the following features:
 
-## Run tests
+- **Basic User Authentication**: Email and password-based authentication with email verification.
+- **API Key Authentication**: Pre-configured API key plugin for managing API access.
+- **Magic Link Authentication**: Enables users to log in via email magic links.
+- **Admin Addon**: Includes functionality for managing permissions and bans.
+- **OpenAPI Plugin**: Generates OpenAPI documentation for authentication endpoints.
 
-```bash
-# unit tests
-$ yarn run test
+[View `auth.ts` source code](https://github.com/withviktor/better-auth-integration/blob/main/src/utils/auth.ts)
 
-# e2e tests
-$ yarn run test:e2e
+### Email Sending with Resend SDK
 
-# test coverage
-$ yarn run test:cov
-```
+The `resend.ts` file integrates **Resend**, allowing you to send emails for:
 
-## Deployment
+- Email verification
+- Magic link authentication
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+[View `resend.ts` source code](https://github.com/withviktor/better-auth-integration/blob/main/src/utils/resend.ts)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Database ORM with Prisma
 
-```bash
-$ yarn install -g mau
-$ mau deploy
-```
+This boilerplate uses **Prisma** to manage database operations. It includes:
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- A pre-configured `PrismaClient` for database queries.
+- A detailed schema (`schema.prisma`) for managing users, sessions, accounts, and API keys.
 
-## Resources
+[View Prisma schema](https://github.com/withviktor/better-auth-integration/blob/main/prisma/schema.prisma)
 
-Check out a few resources that may come in handy when working with NestJS:
+## Contributing
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+We welcome contributions from the community! To contribute:
 
-## Support
+1. Fork the repository.
+2. Create a new branch (`feature/your-feature-name`).
+3. Commit your changes with clear and descriptive messages.
+4. Push your branch and create a Pull Request.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and ensure your contributions align with the project's goals.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+We hope this boilerplate accelerates your development and helps you create better authentication experiences. If you have any questions or suggestions, feel free to open an issue or contribute directly!
+
+Happy coding! 🚀

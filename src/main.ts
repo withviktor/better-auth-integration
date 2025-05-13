@@ -8,7 +8,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const expressApp = express();
-  expressApp.all('/api/auth/*splat', toNodeHandler(auth));
+  expressApp.all('/auth/*splat', toNodeHandler(auth));
 
   expressApp.use(express.json());
 
