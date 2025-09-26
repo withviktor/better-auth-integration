@@ -1,3 +1,22 @@
+## GoodHost Monorepo
+
+TypeScript monorepo for GoodHost (game servers; Minecraft first). Stack: Turbo, pnpm, tRPC, Fastify, Prisma, BullMQ, Docker.
+
+### Apps
+- api: Fastify + tRPC
+- agent: Node worker (BullMQ + Dockerode)
+- web: Next.js (planned)
+
+### Packages
+- db: Prisma client
+- shared: Shared types/utilities
+
+### Quickstart
+1) Copy env: `cp .env.example .env`
+2) Install: `corepack enable && corepack prepare pnpm@9.11.0 --activate && pnpm i -w`
+3) Generate Prisma: `pnpm --filter @goodhost/db generate`
+4) Start services (requires Docker locally): `docker compose up -d`
+5) Dev API: `pnpm --filter @goodhost/api dev` | Dev Agent: `pnpm --filter @goodhost/agent dev`
 # Better Auth Integration Boilerplate
 
 Welcome to **Better Auth Integration Boilerplate**, a starter template designed to help you quickly set up secure and modern authentication for your applications. This project is built primarily with **TypeScript** and **JavaScript**, making it easy to extend and adapt for your specific needs.

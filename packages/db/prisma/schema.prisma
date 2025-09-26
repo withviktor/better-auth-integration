@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  servers   Server[]
+}
+
+model Server {
+  id            String   @id @default(cuid())
+  name          String
+  type          ServerType
+  image         String
+  status        ServerStatus @default(PENDING)
+  nodeId        String?
+  ownerId       String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  ports         Port[]
+  env           Json
+  owner         User     @relation(fields: [ownerId], references: [id])
+}
+
+model Port {
+  id        String  @id @default(cuid())
+  serverId  String
+  external  Int
+  internal  Int
+  protocol  String
+  server    Server  @relation(fields: [serverId], references: [id])
+}
+
+enum ServerType {
+  MINECRAFT
+}
+
+enum ServerStatus {
+  PENDING
+  STARTING
+  RUNNING
+  STOPPING
+  STOPPED
+  ERROR
+}
