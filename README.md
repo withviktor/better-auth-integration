@@ -1,136 +1,344 @@
-# Better Auth Integration Boilerplate
+# GoodHost - Advanced Game Server Management System
 
-Welcome to **Better Auth Integration Boilerplate**, a starter template designed to help you quickly set up secure and modern authentication for your applications. This project is built primarily with **TypeScript** and **JavaScript**, making it easy to extend and adapt for your specific needs.
+A comprehensive, enterprise-grade game server hosting and management platform built with TypeScript, NestJS, and Docker. Designed to replace Pterodactyl with modern architecture and advanced features.
 
-## Table of Contents
+## 🚀 Features
 
-- [About](#about)
-- [Features](#features)
-- [Getting Started](#getting-started)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Integrations](#integrations)
-- [Contributing](#contributing)
-- [License](#license)
+### Core Features
+- **Multi-Game Support**: Minecraft (Java & Bedrock), Valheim, Terraria, CS:GO, Garry's Mod
+- **Docker-Based**: Containerized game servers for isolation and scalability
+- **Real-time Monitoring**: Live server metrics, resource usage, and player statistics
+- **WebSocket Integration**: Real-time updates for server status and logs
+- **Advanced File Manager**: Web-based file editing with syntax highlighting
+- **Automated Backups**: Scheduled and manual backups with compression
+- **Template System**: Pre-configured server templates for quick deployment
+- **User Management**: Multi-user support with role-based access control
 
----
+### Enterprise Features
+- **Job Queue System**: Redis-based job processing for server operations
+- **Resource Monitoring**: CPU, memory, disk, and network usage tracking
+- **Auto-scaling**: Dynamic resource allocation based on demand
+- **Health Checks**: Automated server health monitoring and recovery
+- **Audit Logging**: Complete audit trail for all operations
+- **API-First**: RESTful API with comprehensive endpoints
 
-## About
+## 🏗️ Architecture
 
-This boilerplate serves as a quick-start template for integrating authentication into your applications. It provides a well-structured codebase with best practices for authentication, email handling, and database management, making it easier to focus on building your core application features.
+### Technology Stack
+- **Backend**: NestJS, TypeScript, Prisma ORM
+- **Database**: PostgreSQL with migrations
+- **Queue**: Redis with Bull queues
+- **Containerization**: Docker & Docker Compose
+- **Real-time**: Socket.IO for WebSocket connections
+- **Authentication**: JWT-based authentication system
 
-## Features
-
-- **Pre-configured Authentication**: Includes basic user authentication, API key authentication, magic link authentication, and an admin addon for managing permissions and bans.
-- **Email Sending**: Integrated with the Resend SDK for handling email communication (e.g., email verification and magic links).
-- **Database ORM**: Uses Prisma for database operations with a ready-to-use schema for users, sessions, accounts, and API keys.
-- **TypeScript-first**: Ensures type safety and better developer experience.
-- **Customizable**: Easily extend and modify the boilerplate to suit your needs.
-- **Secure**: Implements best practices for secure authentication.
-
-## Getting Started
-
-Follow the steps below to get started with this boilerplate.
-
-### Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Node.js** (v16 or higher)
-- **npm** or **yarn**
-
-### Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/withviktor/better-auth-integration.git
-   cd better-auth-integration
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-## Configuration
-
-This boilerplate includes configuration options to suit various use cases. Update the following files to set up your authentication, email, and database:
-
-- **Authentication**: Modify `src/utils/auth.ts` to configure BetterAuth (e.g., enable plugins like API keys, magic links, and OpenAPI).
-- **Email Sending**: Update `src/utils/resend.ts` with your Resend API key.
-- **Database**: Check `prisma/schema.prisma` to configure your database schema and connection.
-
-## Usage
-
-After configuring the boilerplate, you can start building your application.
-
-### Example
-
-Here’s how to use the boilerplate to set up authentication:
-
-```typescript
-import { auth } from './utils/auth';
-
-// Use the `auth` object in your application
-app.use(auth.middleware);
+### System Components
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend UI   │    │   NestJS API    │    │   Docker Host   │
+│   (React/Vue)   │◄──►│   (Backend)     │◄──►│  Game Servers   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │   PostgreSQL    │
+                    │   (Database)    │
+                    └─────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │     Redis       │
+                    │  (Job Queue)    │
+                    └─────────────────┘
 ```
 
-## Integrations
+## 📦 Installation
 
-This boilerplate includes the following key integrations:
+### Prerequisites
+- Node.js 18+ 
+- Docker & Docker Compose
+- PostgreSQL 15+
+- Redis 7+
 
-### Authentication with BetterAuth
+### Quick Start
 
-The `auth.ts` file pre-configures **BetterAuth** with the following features:
+1. **Clone the repository**
+```bash
+git clone <your-repo-url>
+cd goodhost-server-management
+```
 
-- **Basic User Authentication**: Email and password-based authentication with email verification.
-- **API Key Authentication**: Pre-configured API key plugin for managing API access.
-- **Magic Link Authentication**: Enables users to log in via email magic links.
-- **Admin Addon**: Includes functionality for managing permissions and bans.
-- **OpenAPI Plugin**: Generates OpenAPI documentation for authentication endpoints.
+2. **Install dependencies**
+```bash
+yarn install
+```
 
-[View `auth.ts` source code](https://github.com/withviktor/better-auth-integration/blob/main/src/utils/auth.ts)
+3. **Set up environment**
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
 
-### Email Sending with Resend SDK
+4. **Start services with Docker Compose**
+```bash
+docker-compose up -d postgres redis
+```
 
-The `resend.ts` file integrates **Resend**, allowing you to send emails for:
+5. **Run database migrations**
+```bash
+npx prisma migrate dev
+```
 
-- Email verification
-- Magic link authentication
+6. **Start the application**
+```bash
+yarn start:dev
+```
 
-[View `resend.ts` source code](https://github.com/withviktor/better-auth-integration/blob/main/src/utils/resend.ts)
+The API will be available at `http://localhost:3000`
 
-### Database ORM with Prisma
+### Production Deployment
 
-This boilerplate uses **Prisma** to manage database operations. It includes:
+1. **Build the application**
+```bash
+yarn build
+```
 
-- A pre-configured `PrismaClient` for database queries.
-- A detailed schema (`schema.prisma`) for managing users, sessions, accounts, and API keys.
+2. **Start with Docker Compose**
+```bash
+docker-compose up -d
+```
 
-[View Prisma schema](https://github.com/withviktor/better-auth-integration/blob/main/prisma/schema.prisma)
+## 🔧 Configuration
 
-## Contributing
+### Environment Variables
 
-We welcome contributions from the community! To contribute:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | - |
+| `REDIS_HOST` | Redis server hostname | localhost |
+| `REDIS_PORT` | Redis server port | 6379 |
+| `PORT` | API server port | 3000 |
+| `DOCKER_SOCKET_PATH` | Docker socket path | /var/run/docker.sock |
+| `GAME_SERVERS_PATH` | Game server files directory | /app/game_servers |
+| `BACKUP_PATH` | Backup files directory | /app/backups |
+| `MAX_SERVERS_PER_USER` | Maximum servers per user | 5 |
 
-1. Fork the repository.
-2. Create a new branch (`feature/your-feature-name`).
-3. Commit your changes with clear and descriptive messages.
-4. Push your branch and create a Pull Request.
+See `.env.example` for complete configuration options.
 
-Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and ensure your contributions align with the project's goals.
+## 📚 API Documentation
 
-## License
+### Authentication Endpoints
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/profile` - Get user profile
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+### Server Management
+- `GET /api/servers` - List user's servers
+- `POST /api/servers` - Create new server
+- `GET /api/servers/:id` - Get server details
+- `PUT /api/servers/:id` - Update server
+- `DELETE /api/servers/:id` - Delete server
+- `POST /api/servers/:id/start` - Start server
+- `POST /api/servers/:id/stop` - Stop server
+- `POST /api/servers/:id/restart` - Restart server
+
+### File Management
+- `GET /api/files/servers/:id` - List server files
+- `GET /api/files/servers/:id/content` - Read file content
+- `PUT /api/files/servers/:id/content` - Update file content
+- `POST /api/files/servers/:id/directories` - Create directory
+- `DELETE /api/files/servers/:id/items` - Delete file/directory
+
+### Backup System
+- `GET /api/backups` - List user's backups
+- `POST /api/backups` - Create manual backup
+- `POST /api/backups/:id/restore` - Restore backup
+- `DELETE /api/backups/:id` - Delete backup
+
+### Monitoring
+- `GET /api/monitoring/overview` - System overview
+- `GET /api/monitoring/servers/:id/metrics` - Server metrics
+- `GET /api/monitoring/servers/:id/health` - Server health check
+
+## 🎮 Supported Games
+
+### Minecraft Java Edition
+- Versions: 1.16.5 - 1.20.4
+- Server Types: Vanilla, Paper, Forge, Fabric
+- Plugins: Automatic plugin management
+- Configurations: server.properties, bukkit.yml, spigot.yml
+
+### Minecraft Bedrock Edition  
+- Cross-platform compatibility
+- Automatic world management
+- Resource pack support
+
+### Valheim
+- Dedicated server support
+- World management
+- Password protection
+- Public server listing
+
+### Terraria
+- Multi-world support
+- Player management
+- Mod support (tModLoader)
+
+### Counter-Strike: Global Offensive
+- Custom maps and configs
+- Workshop integration
+- Player statistics
+
+## 🔄 Development
+
+### Project Structure
+```
+src/
+├── modules/
+│   ├── auth/           # Authentication system
+│   ├── game-server/    # Server management
+│   ├── docker/         # Docker integration
+│   ├── monitoring/     # System monitoring
+│   ├── backup/         # Backup system
+│   ├── file-manager/   # File management
+│   ├── template/       # Server templates
+│   ├── websocket/      # Real-time features
+│   └── prisma/         # Database layer
+├── utils/              # Utility functions
+├── app.module.ts       # Main application module
+└── main.ts            # Application entry point
+```
+
+### Development Commands
+```bash
+# Start development server
+yarn start:dev
+
+# Run tests
+yarn test
+
+# Run e2e tests
+yarn test:e2e
+
+# Build for production
+yarn build
+
+# Database operations
+npx prisma migrate dev    # Run migrations
+npx prisma generate      # Generate client
+npx prisma studio       # Database GUI
+```
+
+### Adding New Game Support
+
+1. Create server template in `template.service.ts`
+2. Add Docker image configuration
+3. Update environment variables mapping
+4. Add game-specific configurations
+5. Test with sample server
+
+## 📊 Monitoring & Metrics
+
+### Real-time Metrics
+- CPU usage per server
+- Memory consumption
+- Disk I/O statistics
+- Network traffic
+- Player count (game-specific)
+
+### System Health
+- Container status monitoring
+- Automatic restart on crashes
+- Resource usage alerts
+- Performance optimization suggestions
+
+### Logging
+- Structured logging with Winston
+- Container logs aggregation
+- Audit trail for all operations
+- Error tracking and reporting
+
+## 🔒 Security
+
+### Authentication
+- JWT-based session management
+- Password hashing with bcrypt
+- Rate limiting on API endpoints
+- Session timeout and refresh
+
+### Container Security
+- Isolated game server containers
+- Resource limits enforcement
+- Network security groups
+- File system permissions
+
+### Data Protection
+- Database encryption at rest
+- Secure file upload handling
+- Input validation and sanitization
+- CORS configuration
+
+## 🚀 Scaling & Performance
+
+### Horizontal Scaling
+- Multi-node Docker support
+- Load balancing for API servers
+- Database read replicas
+- Redis clustering
+
+### Optimization
+- Connection pooling
+- Query optimization
+- Caching strategies
+- Background job processing
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+### Code Standards
+- TypeScript strict mode
+- ESLint configuration
+- Prettier formatting
+- Jest testing framework
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- Documentation: [Wiki](https://github.com/your-org/goodhost/wiki)
+- Issues: [GitHub Issues](https://github.com/your-org/goodhost/issues)
+- Discord: [Community Server](https://discord.gg/your-invite)
+- Email: support@goodhost.com
+
+## 🗺️ Roadmap
+
+### Phase 1 (Current)
+- ✅ Core server management
+- ✅ Docker integration
+- ✅ Basic monitoring
+- ✅ File management
+- ✅ Backup system
+
+### Phase 2 (Next)
+- 🔄 Frontend dashboard
+- 🔄 Advanced monitoring
+- 🔄 Plugin system
+- 🔄 Multi-node support
+
+### Phase 3 (Future)
+- 📋 VPS hosting integration
+- 📋 Kubernetes support
+- 📋 Advanced analytics
+- 📋 Marketplace integration
 
 ---
 
-We hope this boilerplate accelerates your development and helps you create better authentication experiences. If you have any questions or suggestions, feel free to open an issue or contribute directly!
-
-Happy coding! 🚀
+Built with ❤️ by the GoodHost team. Empowering gamers to host better servers.

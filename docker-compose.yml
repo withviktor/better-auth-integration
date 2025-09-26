@@ -2,16 +2,54 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:13
-    container_name: postgres
+    image: postgres:15
+    container_name: goodhost_postgres
     environment:
-      POSTGRES_USER: ciernava
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: mydb
+      POSTGRES_USER: goodhost
+      POSTGRES_PASSWORD: goodhost_secret
+      POSTGRES_DB: goodhost_db
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - goodhost_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: goodhost_redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - goodhost_network
+
+  # Game server management application
+  goodhost_app:
+    build: .
+    container_name: goodhost_app
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_URL=postgresql://goodhost:goodhost_secret@postgres:5432/goodhost_db
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=development
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker socket for container management
+      - game_servers:/app/game_servers  # Game server data storage
+    networks:
+      - goodhost_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  redis_data:
+  game_servers:
+
+networks:
+  goodhost_network:
+    driver: bridge

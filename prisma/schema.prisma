@@ -33,6 +33,13 @@ model User {
   members     Member[]
   invitations Invitation[]
 
+  // Game server hosting specific fields
+  gameServers GameServer[]
+  serverTemplates ServerTemplate[]
+  serverBackups ServerBackup[]
+  credits     Int      @default(0)
+  maxServers  Int      @default(5)
+
   @@unique([email])
   @@map("user")
 }
@@ -167,4 +174,216 @@ model Team {
   updatedAt      DateTime?
 
   @@map("team")
+}
+
+// Game Server Management Models
+model GameServer {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  
+  // Server Configuration
+  gameType    String // minecraft, valheim, etc.
+  version     String
+  port        Int
+  maxPlayers  Int    @default(20)
+  
+  // Docker Configuration  
+  containerId String?
+  imageName   String
+  dockerPort  Int?
+  
+  // Server Status
+  status      ServerStatus @default(STOPPED)
+  cpuUsage    Float?       @default(0)
+  memoryUsage Float?       @default(0)
+  diskUsage   Float?       @default(0)
+  
+  // Ownership
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Configuration
+  config      Json?
+  environment Json?
+  
+  // File Management
+  serverPath  String?
+  backups     ServerBackup[]
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastStarted DateTime?
+  lastStopped DateTime?
+  
+  // Relations
+  template    ServerTemplate? @relation(fields: [templateId], references: [id])
+  templateId  String?
+  
+  logs        ServerLog[]
+  metrics     ServerMetric[]
+
+  @@map("game_server")
+}
+
+model ServerTemplate {
+  id          String @id @default(uuid())
+  name        String
+  description String?
+  gameType    String
+  version     String
+  
+  // Docker Configuration
+  dockerImage String
+  dockerfile  String?
+  
+  // Default Configuration
+  defaultConfig Json?
+  environment   Json?
+  
+  // Resource Limits
+  minMemory     Int @default(512)   // MB
+  maxMemory     Int @default(2048)  // MB
+  minCpu        Float @default(0.5)
+  maxCpu        Float @default(2.0)
+  
+  // Ownership
+  isPublic      Boolean @default(false)
+  userId        String?
+  user          User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Usage
+  gameServers   GameServer[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("server_template")
+}
+
+model ServerBackup {
+  id           String @id @default(uuid())
+  name         String
+  description  String?
+  
+  // Server Reference
+  gameServerId String
+  gameServer   GameServer @relation(fields: [gameServerId], references: [id], onDelete: Cascade)
+  
+  // Backup Details
+  filePath     String
+  fileSize     BigInt
+  backupType   BackupType @default(MANUAL)
+  
+  // Ownership
+  userId       String
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt    DateTime @default(now())
+  
+  @@map("server_backup")
+}
+
+model ServerLog {
+  id           String @id @default(uuid())
+  
+  // Server Reference
+  gameServerId String
+  gameServer   GameServer @relation(fields: [gameServerId], references: [id], onDelete: Cascade)
+  
+  // Log Details
+  level        LogLevel @default(INFO)
+  message      String
+  source       String?  // console, system, docker, etc.
+  
+  createdAt    DateTime @default(now())
+
+  @@map("server_log")
+}
+
+model ServerMetric {
+  id           String @id @default(uuid())
+  
+  // Server Reference
+  gameServerId String
+  gameServer   GameServer @relation(fields: [gameServerId], references: [id], onDelete: Cascade)
+  
+  // Metrics
+  cpuUsage     Float
+  memoryUsage  Float
+  diskUsage    Float
+  networkIn    Float?
+  networkOut   Float?
+  playerCount  Int?
+  
+  createdAt    DateTime @default(now())
+
+  @@map("server_metric")
+}
+
+// Node Management for Multi-Server Setup
+model Node {
+  id          String @id @default(uuid())
+  name        String
+  hostname    String
+  ipAddress   String
+  port        Int    @default(2376)
+  
+  // Node Status
+  status      NodeStatus @default(OFFLINE)
+  cpuCores    Int
+  totalMemory BigInt // bytes
+  totalDisk   BigInt // bytes
+  
+  // Docker Configuration
+  dockerVersion String?
+  
+  // Resource Usage
+  usedMemory  BigInt @default(0)
+  usedDisk    BigInt @default(0)
+  
+  // Authentication
+  tlsCert     String?
+  tlsKey      String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastPing    DateTime?
+
+  @@unique([hostname])
+  @@unique([ipAddress, port])
+  @@map("node")
+}
+
+// Enums
+enum ServerStatus {
+  STOPPED
+  STARTING
+  RUNNING
+  STOPPING
+  CRASHED
+  INSTALLING
+  UPDATING
+}
+
+enum NodeStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+  ERROR
+}
+
+enum BackupType {
+  MANUAL
+  SCHEDULED
+  AUTO_SAVE
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
 }

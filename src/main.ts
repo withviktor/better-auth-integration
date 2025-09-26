@@ -1,19 +1,54 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
-import * as express from 'express';
-import { toNodeHandler } from 'better-auth/node';
-import { auth } from './utils/auth';
+import { PrismaService } from './modules/prisma/prisma.service';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
+  
+  try {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+    });
 
-  const expressApp = express();
-  expressApp.all('/auth/*splat', toNodeHandler(auth));
+    // Serve static files
+    app.useStaticAssets(join(__dirname, '..', 'public'));
 
-  expressApp.use(express.json());
+    // Enable validation pipes globally
+    app.useGlobalPipes(new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }));
 
-  app.use(expressApp);
+    // Enable CORS
+    app.enableCors({
+      origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+      credentials: true,
+    });
 
-  await app.listen(process.env.PORT ?? 3000);
+    // Global prefix for API routes
+    app.setGlobalPrefix('api', {
+      exclude: ['/', '/health'],
+    });
+
+    // Enable Prisma shutdown hooks
+    const prismaService = app.get(PrismaService);
+    await prismaService.enableShutdownHooks(app);
+
+    const port = process.env.PORT || 3000;
+    await app.listen(port);
+
+    logger.log(`🚀 GoodHost Server Management API is running on: http://localhost:${port}`);
+    logger.log(`📊 Health check: http://localhost:${port}/health`);
+    logger.log(`📖 API Info: http://localhost:${port}/api/info`);
+    logger.log(`🔌 WebSocket: http://localhost:${port}/socket.io`);
+  } catch (error) {
+    logger.error('Failed to start application', error);
+    process.exit(1);
+  }
 }
+
 bootstrap();
