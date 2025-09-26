@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,157 +11,165 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  apikeys Apikey[]
+  servers     Server[]
+  activities  Activity[]
 
-  role        String?
-  banned      Boolean?
-  banReason   String?
-  banExpires  DateTime?
-  members     Member[]
-  invitations Invitation[]
-
-  @@unique([email])
-  @@map("user")
+  @@map("users")
 }
 
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  impersonatedBy       String?
-  activeOrganizationId String?
-
-  @@unique([token])
-  @@map("session")
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
-
-  @@map("account")
-}
-
-model Verification {
-  id         String    @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
-
-  @@map("verification")
-}
-
-model Apikey {
-  id                  String    @id
-  name                String?
-  start               String?
-  prefix              String?
-  key                 String
-  userId              String
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refillInterval      Int?
-  refillAmount        Int?
-  lastRefillAt        DateTime?
-  enabled             Boolean?
-  rateLimitEnabled    Boolean?
-  rateLimitTimeWindow Int?
-  rateLimitMax        Int?
-  requestCount        Int?
-  remaining           Int?
-  lastRequest         DateTime?
-  expiresAt           DateTime?
-  createdAt           DateTime
-  updatedAt           DateTime
-  permissions         String?
-  metadata            String?
-
-  @@map("apikey")
-}
-
-model Organization {
-  id          String       @id
+model Server {
+  id          String   @id @default(cuid())
   name        String
-  slug        String?
-  logo        String?
-  createdAt   DateTime
-  metadata    String?
-  members     Member[]
-  invitations Invitation[]
+  description String?
+  status      ServerStatus @default(OFFLINE)
+  gameType    GameType
+  version     String
+  port        Int      @unique
+  maxPlayers  Int      @default(20)
+  motd        String?
 
-  teams Team[]
+  // Resource allocation
+  cpuLimit    Int      @default(2000) // Millicores
+  memoryLimit Int      @default(2048) // MB
+  diskLimit   Int      @default(10240) // MB
 
-  @@unique([slug])
-  @@map("organization")
+  // Docker configuration
+  dockerImage String   @default("itzg/minecraft-server")
+  dockerPorts Json?    // Store port mappings as JSON
+
+  // Server configuration
+  config      Json?    // Store server-specific config as JSON
+
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  instances   ServerInstance[]
+  backups     Backup[]
+  activities  Activity[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("servers")
 }
 
-model Member {
-  id             String       @id
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           String
-  createdAt      DateTime
+model ServerInstance {
+  id          String   @id @default(cuid())
+  serverId    String
+  server      Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
-  teamId String?
+  containerId String?  // Docker container ID
+  status      InstanceStatus @default(STOPPED)
 
-  @@map("member")
+  // Runtime metrics
+  cpuUsage    Float?
+  memoryUsage Float?
+  diskUsage   Float?
+  uptime      Int?     // seconds
+
+  // Network
+  bytesIn     BigInt?  @default(0)
+  bytesOut    BigInt?  @default(0)
+
+  startedAt   DateTime?
+  stoppedAt   DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("server_instances")
 }
 
-model Invitation {
-  id             String       @id
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  email          String
-  role           String?
-  status         String
-  expiresAt      DateTime
-  inviterId      String
-  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+model Backup {
+  id          String   @id @default(cuid())
+  serverId    String
+  server      Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
-  teamId String?
+  name        String
+  description String?
+  filePath    String
+  fileSize    BigInt
+  status      BackupStatus @default(PENDING)
 
-  @@map("invitation")
+  createdAt   DateTime @default(now())
+
+  @@map("backups")
 }
 
-model Team {
-  id             String       @id
-  name           String
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt      DateTime
-  updatedAt      DateTime?
+model Activity {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  serverId    String?
+  server      Server?  @relation(fields: [serverId], references: [id], onDelete: SetNull)
 
-  @@map("team")
+  action      String   // e.g., "SERVER_START", "SERVER_STOP", "BACKUP_CREATE"
+  details     Json?    // Additional details about the action
+  ipAddress   String?
+  userAgent   String?
+
+  createdAt   DateTime @default(now())
+
+  @@map("activities")
+}
+
+model ResourceUsage {
+  id        String   @id @default(cuid())
+  serverId  String
+  server    Server   @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  cpuUsage    Float
+  memoryUsage Float
+  diskUsage   Float
+  networkIn   BigInt
+  networkOut  BigInt
+  players     Int      @default(0)
+
+  timestamp DateTime @default(now())
+
+  @@map("resource_usage")
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum ServerStatus {
+  ONLINE
+  OFFLINE
+  STARTING
+  STOPPING
+  ERROR
+}
+
+enum InstanceStatus {
+  RUNNING
+  STOPPED
+  PAUSED
+  ERROR
+}
+
+enum GameType {
+  MINECRAFT_JAVA
+  MINECRAFT_BEDROCK
+  MINECRAFT_PAPER
+  MINECRAFT_SPIGOT
+  MINECRAFT_BUNGEE
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
